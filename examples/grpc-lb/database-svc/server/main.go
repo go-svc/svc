@@ -7,8 +7,11 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/go-svc/svc/examples/grpc-lb/database-svc/pb"
+	"github.com/go-svc/svc/sd/consul"
+	"github.com/hashicorp/consul/api"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	uuid "github.com/satori/go.uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -55,6 +58,18 @@ func main() {
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
 		db: newConnection(),
 	})
+
+	sd := consul.NewClient(api.DefaultConfig())
+
+	info := &api.AgentServiceRegistration{
+		ID:   uuid.NewV4().String(),
+		Name: "Database",
+		Port: 50050,
+		Tags: []string{"db"},
+	}
+
+	sd.Agent().ServiceRegister(info)
+
 	// 在 gRPC 伺服器上註冊反射服務。
 	reflection.Register(s)
 	// 開始在指定埠口中服務。
