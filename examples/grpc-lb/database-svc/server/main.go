@@ -46,12 +46,27 @@ func newConnection() *gorm.DB {
 	return db
 }
 
+func registerService() {
+	// 以預設設定檔建立 Consul 客戶端。
+	client, _ := api.NewClient(api.DefaultConfig())
+	sd := consul.NewClient(client)
+
+	// 註冊資料庫服務到服務探索中心。
+	sd.Register(&api.AgentServiceRegistration{
+		ID:   uuid.NewV4().String(),
+		Name: "Database",
+		Port: 50050,
+		Tags: []string{"db"},
+	})
+}
+
 func main() {
 	// 監聽指定埠口，這樣服務才能在該埠口執行。
 	lis, err := net.Listen("tcp", ":50050")
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
+
 	// 建立新 gRPC 伺服器並註冊 Todo 服務。
 	s := grpc.NewServer()
 	pb.RegisterTodoServer(s, &server{
@@ -59,16 +74,8 @@ func main() {
 		db: newConnection(),
 	})
 
-	sd := consul.NewClient(api.DefaultConfig())
-
-	info := &api.AgentServiceRegistration{
-		ID:   uuid.NewV4().String(),
-		Name: "Database",
-		Port: 50050,
-		Tags: []string{"db"},
-	}
-
-	sd.Agent().ServiceRegister(info)
+	// 將此服務註冊到服務探索中心。
+	registerService()
 
 	// 在 gRPC 伺服器上註冊反射服務。
 	reflection.Register(s)
