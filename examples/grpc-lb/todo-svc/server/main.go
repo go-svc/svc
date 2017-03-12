@@ -37,8 +37,9 @@ func (s *server) List(ctx context.Context, in *pb.Void) (*pb.Tasks, error) {
 
 // newDB 會建立並回傳一個新的 gRPC 客戶端連線到指定的 gRPC 資料庫伺服器。
 func newDB() pb.TodoClient {
-	sd := consul.NewClient(api.DefaultConfig())
-	opt := lb.BalancerOption{
+	client, _ := api.NewClient(api.DefaultConfig())
+	sd := consul.NewClient(client)
+	opt := lb.ConsulOption{
 		ServiceName: "Database",
 		Tag:         "",
 		Consul:      sd,
