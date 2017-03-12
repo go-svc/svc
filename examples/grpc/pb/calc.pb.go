@@ -92,6 +92,7 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for Calculator service
 
 type CalculatorClient interface {
+	// Plus 會接收 CalcRequest 資料作加總，最終會回傳 CalcReply。
 	Plus(ctx context.Context, in *CalcRequest, opts ...grpc.CallOption) (*CalcReply, error)
 }
 
@@ -115,6 +116,7 @@ func (c *calculatorClient) Plus(ctx context.Context, in *CalcRequest, opts ...gr
 // Server API for Calculator service
 
 type CalculatorServer interface {
+	// Plus 會接收 CalcRequest 資料作加總，最終會回傳 CalcReply。
 	Plus(context.Context, *CalcRequest) (*CalcReply, error)
 }
 
