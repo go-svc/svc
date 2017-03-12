@@ -4,9 +4,7 @@ import (
 	"log"
 
 	"github.com/go-svc/svc/examples/grpc/pb"
-
 	"golang.org/x/net/context"
-
 	"google.golang.org/grpc"
 )
 
