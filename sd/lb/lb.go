@@ -2,6 +2,7 @@ package lb
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/go-svc/svc/sd/consul"
@@ -11,17 +12,21 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	RoundRobin = 0
+	Random     = 1
+)
+
 type ConsulOption struct {
 	ServiceName string
+	Mode        int
 	Consul      consul.Client
 	Tag         string
 }
 
 // ConsulBalancer 是一個負載平衡器。
 type ConsulBalancer struct {
-	ServiceName string
-	Tag         string
-	Consul      consul.Client
+	Option      ConsulOption
 	lastAddress int
 	Addresses   []grpc.Address
 }
@@ -30,7 +35,7 @@ type ConsulBalancer struct {
 func NewBalancer(opt interface{}) grpc.Balancer {
 	switch opt := opt.(type) {
 	case ConsulOption:
-		return &ConsulBalancer{ServiceName: opt.ServiceName, Consul: opt.Consul, Tag: opt.Tag}
+		return &ConsulBalancer{Option: opt}
 	}
 	return nil
 }
@@ -59,14 +64,17 @@ func (b *ConsulBalancer) Get(ctx context.Context, opts grpc.BalancerGetOptions) 
 	if len(b.Addresses) == 0 {
 		addr = grpc.Address{}
 	} else {
-		fmt.Println(b.Addresses)
-		if len(b.Addresses)-1 > b.lastAddress {
-			addr = b.Addresses[b.lastAddress+1]
-			fmt.Println(addr)
-			b.lastAddress++
+		if b.Option.Mode == RoundRobin {
+			if len(b.Addresses)-1 > b.lastAddress {
+				addr = b.Addresses[b.lastAddress+1]
+				b.lastAddress++
+			} else {
+				addr = b.Addresses[0]
+				b.lastAddress = 0
+			}
 		} else {
-			addr = b.Addresses[0]
-			b.lastAddress = 0
+			rand.Seed(time.Now().Unix())
+			addr = b.Addresses[rand.Intn(len(b.Addresses))]
 			fmt.Println(addr)
 		}
 
@@ -87,7 +95,7 @@ func (b *ConsulBalancer) Notify() <-chan []grpc.Address {
 			<-time.After(3 * time.Second)
 
 			// 從服務探索中心裡取得所有相關的服務。
-			services, _, _ := b.Consul.Client().Catalog().Service(b.ServiceName, b.Tag, &api.QueryOptions{})
+			services, _, _ := b.Option.Consul.Client().Catalog().Service(b.Option.ServiceName, b.Option.Tag, &api.QueryOptions{})
 			// 如果服務探索中心裡沒有需要的服務，則略過此次搜尋，直接進行下一輪搜尋。
 			if len(services) == 0 {
 				continue
