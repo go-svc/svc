@@ -41,6 +41,7 @@ func newDB() pb.TodoClient {
 	sd := consul.NewClient(client)
 	opt := lb.ConsulOption{
 		ServiceName: "Database",
+		Mode:        lb.RoundRobin,
 		Tag:         "",
 		Consul:      sd,
 	}
