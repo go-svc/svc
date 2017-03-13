@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net"
+	"os"
+	"strconv"
 
 	"golang.org/x/net/context"
 
@@ -15,6 +17,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+// port 是指定部署的埠口。
+var port string
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
 type server struct {
@@ -46,23 +51,30 @@ func newConnection() *gorm.DB {
 	return db
 }
 
+// registerService 會將此服務註冊到服務探索中心。
 func registerService() {
 	// 以預設設定檔建立 Consul 客戶端。
-	client, _ := api.NewClient(api.DefaultConfig())
-	sd := consul.NewClient(client)
-
+	sd, _ := consul.NewClient(api.DefaultConfig())
+	// 取得部署的埠口。
+	p, _ := strconv.Atoi(port)
 	// 註冊資料庫服務到服務探索中心。
 	sd.Register(&api.AgentServiceRegistration{
 		ID:   uuid.NewV4().String(),
 		Name: "Database",
-		Port: 50050,
+		Port: p,
 		Tags: []string{"db"},
 	})
 }
 
 func main() {
+	// 取得部署的埠口，如果以 `go run` 執行，那麼埠口就是 `os.Args[1]` 而不是 `os.Args[0]`。
+	port = os.Args[0]
+	if len(os.Args) == 2 {
+		port = os.Args[1]
+	}
+
 	// 監聽指定埠口，這樣服務才能在該埠口執行。
-	lis, err := net.Listen("tcp", ":50050")
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
