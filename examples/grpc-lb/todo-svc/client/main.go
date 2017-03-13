@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/go-svc/svc/examples/grpc-lb/todo-svc/pb"
@@ -26,10 +27,10 @@ func main() {
 	log.Printf("Add 結果：%v, %v", r.Title, r.Content)
 
 	// 傳送新請求到遠端 gRPC 伺服器 Todo 中，並呼叫 List 函式，列出所有在資料庫內的工作記事。
-	//tasks, err := c.List(context.Background(), &pb.Void{})
-	//if err != nil {
-	//	log.Fatalf("無法執行 List 函式：%v", err)
-	//}
-	//t, _ := json.Marshal(tasks)
-	//log.Printf("List 結果：%v", string(t))
+	tasks, err := c.List(context.Background(), &pb.Void{})
+	if err != nil {
+		log.Fatalf("無法執行 List 函式：%v", err)
+	}
+	t, _ := json.Marshal(tasks)
+	log.Printf("List 結果：%v", string(t))
 }
