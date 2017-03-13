@@ -1,12 +1,13 @@
-# grpc-database
+# grpc-lb
 
-這個範例包含了資料庫和服務之間的溝通。這些服務皆共享同個 Protobuf 檔案，工作記事服務將會建立一個新的 gRPC 連線到資料庫服務，而客戶端將會呼叫工作記事服務。
+這個範例是基於 `grpc-database` 衍生出來的。這個範例會需要安裝 [Consul](https://www.consul.io/)（如果不想安裝 Consul，可查看基本的負載平衡範例：`grpc-fixed-lb`），我們會透過 Consul 在進行負載平衡，資料庫皆會自動向服務探索中心註冊，而工作記事服務需要呼叫資料庫服務時，就會自動透過負載平衡器取得一個可用的資料庫服務實例。負載平衡器支援輪詢（Round-Robin）和隨機（Random）模式。
 
 ## 範例
 
 ```bash
-# 先啟動資料庫服務。
-go run ./database-svc/server/main.go
+# 啟動兩個資料庫服務實例，分別在 50050 和 50052 埠口上部署。
+go run ./database-svc/server/main.go 50050
+go run ./database-svc/server/main.go 50052
 # 接著是工作記事服務。
 go run ./todo-svc/server/main.go
 # 然後開啟客戶端呼叫服務函式。
