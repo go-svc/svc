@@ -35,18 +35,18 @@ func (s *server) List(ctx context.Context, in *pb.Void) (*pb.Tasks, error) {
 	return tasks, nil
 }
 
-// newDB 會建立並回傳一個新的 gRPC 客戶端連線到指定的 gRPC 資料庫伺服器。
+// newDB 會建立並回傳一個基於負載平衡的新 gRPC 客戶端連線到指定的 gRPC 資料庫伺服器。
 func newDB() pb.TodoClient {
-	client, _ := api.NewClient(api.DefaultConfig())
-	sd := consul.NewClient(client)
-	opt := lb.ConsulOption{
-		ServiceName: "Database",
-		Mode:        lb.RoundRobin,
-		Tag:         "",
-		Consul:      sd,
-	}
-
-	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure(), grpc.WithBalancer(lb.NewBalancer(opt)))
+	// 建立新的 Consul 客戶端。
+	sd, _ := consul.NewClient(api.DefaultConfig())
+	// 建立一個基於 Consul 的負載平衡器。
+	balancer := lb.NewBalancer(lb.ConsulOption{
+		Name:   "Database",
+		Mode:   lb.RoundRobin,
+		Tag:    "",
+		Consul: sd,
+	})
+	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure(), grpc.WithBalancer(balancer))
 	if err != nil {
 		log.Fatalf("連線失敗：%v", err)
 	}
@@ -60,12 +60,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
+
 	// 建立新 gRPC 伺服器並註冊 Todo 服務。
 	s := grpc.NewServer()
 	pb.RegisterTodoServer(s, &server{
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
 		db: newDB(),
 	})
+
 	// 在 gRPC 伺服器上註冊反射服務。
 	reflection.Register(s)
 	// 開始在指定埠口中服務。
