@@ -47,12 +47,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
+
 	// 建立新 gRPC 伺服器並註冊 Todo 服務。
 	s := grpc.NewServer()
 	pb.RegisterTodoServer(s, &server{
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
 		db: newDB(),
 	})
+
 	// 在 gRPC 伺服器上註冊反射服務。
 	reflection.Register(s)
 	// 開始在指定埠口中服務。
