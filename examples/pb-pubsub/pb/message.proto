@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package pb;
+
+// Msg 呈現了一個訊息資料。
+message Msg {
+    string content = 1;
+}
