@@ -105,7 +105,6 @@ type Topic struct {
 }
 
 func (t *Topic) Publish(body []byte) error {
-	fmt.Println(t.Name)
 	return t.Producer.Publish(t.Name, body)
 }
 
