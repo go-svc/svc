@@ -17,8 +17,8 @@ type ConsulOption struct {
 	Name string
 	// Mode 是查詢模式，如 `lb.RoundRobin` 或 `lb.Random`。
 	Mode int
-	// Consul 是 Go Svc 的 Consul 客戶端。
-	Consul consul.Client
+	// Client 是 Go Svc 的 Consul 客戶端。
+	Client consul.Client
 	//
 	Tag string
 }
@@ -74,7 +74,7 @@ func (b *ConsulBalancer) Notify() <-chan []grpc.Address {
 			<-time.After(3 * time.Second)
 
 			// 從服務探索中心裡取得所有相關的服務。
-			services, _, _ := b.Option.Consul.Client().Catalog().Service(b.Option.Name, b.Option.Tag, &api.QueryOptions{})
+			services, _, _ := b.Option.Client.Client().Catalog().Service(b.Option.Name, b.Option.Tag, &api.QueryOptions{})
 			// 如果服務探索中心裡沒有需要的服務，則略過此次搜尋，直接進行下一輪搜尋。
 			if len(services) == 0 {
 				continue

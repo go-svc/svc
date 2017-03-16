@@ -44,8 +44,9 @@ func newDB() pb.TodoClient {
 		Name:   "Database",
 		Mode:   lb.RoundRobin,
 		Tag:    "",
-		Consul: sd,
+		Client: sd,
 	})
+
 	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure(), grpc.WithBalancer(balancer))
 	if err != nil {
 		log.Fatalf("連線失敗：%v", err)
