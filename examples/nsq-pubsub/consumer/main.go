@@ -20,9 +20,9 @@ func main() {
 	}, api.NewConfig())
 
 	// 建立一個基於 `msg` 主題的 `user` 頻道。
-	ch := client.CreateChannel("msg", "user")
+	channel := client.CreateChannel("msg", "user")
 	// 以剛才建立的 `user` 頻道來建立一個消費者，用來「消化」基於 `msg` 主題的 `user` 頻道訊息。
-	consumer, _ := client.NewConsumer(ch)
+	consumer, _ := client.NewConsumer(channel)
 
 	// 建立訊息接收函式，當我們接收到訊息就會呼叫這個函式。
 	consumer.AddHandler(func(msg *api.Message) error {
