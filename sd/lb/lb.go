@@ -1,3 +1,4 @@
+// Package lb 能夠協助你建立一個負載平衡器給 gRPC 伺服器使用。
 package lb
 
 import (
