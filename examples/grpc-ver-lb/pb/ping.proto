@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+// Test 是一個用來測試是否有回應的服務。
+service Test {
+    rpc Ping(Void)  returns (Info) {}
+}
+
+// Void 呈現一個什麼都沒有的資料。
+message Void {
+}
+
+// Info 呈現一個帶有服務版本號的資料。
+message Info {
+    string version = 1;
+}
