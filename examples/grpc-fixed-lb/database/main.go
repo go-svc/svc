@@ -3,15 +3,19 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 
 	"golang.org/x/net/context"
 
-	"github.com/go-svc/svc/examples/grpc-database/database-svc/pb"
+	"github.com/go-svc/svc/examples/grpc-fixed-lb/pb"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+// port 是指定部署的埠口。
+var port string
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
 type server struct {
@@ -37,7 +41,6 @@ func (s *server) List(ctx context.Context, in *pb.Void) (*pb.Tasks, error) {
 // newConnection 會建立並回傳一個新的資料庫連線。
 func newConnection() *gorm.DB {
 	db, _ := gorm.Open("sqlite3", "/tmp/gorm.db")
-
 	// 初始化資料表格
 	db.DropTableIfExists(&pb.Task{})
 	db.CreateTable(&pb.Task{})
@@ -45,8 +48,14 @@ func newConnection() *gorm.DB {
 }
 
 func main() {
+	// 取得部署的埠口，如果以 `go run` 執行，那麼埠口就是 `os.Args[1]` 而不是 `os.Args[0]`。
+	port = os.Args[0]
+	if len(os.Args) == 2 {
+		port = os.Args[1]
+	}
+
 	// 監聽指定埠口，這樣服務才能在該埠口執行。
-	lis, err := net.Listen("tcp", ":50050")
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}

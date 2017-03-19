@@ -6,11 +6,11 @@
 
 ```bash
 # 先啟動資料庫服務。
-go run ./database-svc/server/main.go
+go run ./database/main.go
 # 接著是工作記事服務。
-go run ./todo-svc/server/main.go
+go run ./server/main.go
 # 然後開啟客戶端呼叫服務函式。
-go run ./todo-svc/client/main.go
+go run ./client/main.go
 ```
 
 ```bash

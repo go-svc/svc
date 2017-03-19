@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/go-svc/svc/examples/grpc-lb/todo-svc/pb"
+	"github.com/go-svc/svc/examples/grpc-lb/pb"
 	"github.com/go-svc/svc/sd/consul"
 	"github.com/go-svc/svc/sd/lb"
 	"github.com/hashicorp/consul/api"

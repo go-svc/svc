@@ -3,13 +3,16 @@ package main
 import (
 	"log"
 	"net"
+	"os"
+	"strings"
 
 	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/go-svc/svc/examples/grpc-database/todo-svc/pb"
+	"github.com/go-svc/svc/examples/grpc-fixed-lb/pb"
+	"github.com/go-svc/svc/sd/lb"
 )
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
@@ -32,12 +35,25 @@ func (s *server) List(ctx context.Context, in *pb.Void) (*pb.Tasks, error) {
 	return tasks, nil
 }
 
-// newDB 會建立並回傳一個新的 gRPC 客戶端連線到指定的 gRPC 資料庫伺服器。
+// newDB 會建立並回傳一個基於負載平衡的新 gRPC 客戶端連線到指定的 gRPC 資料庫伺服器。
 func newDB() pb.TodoClient {
-	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure())
+	// 取得實例群的地址，如果以 `go run` 執行，那麼實例群的地址就是 `os.Args[1]` 而不是 `os.Args[0]`。
+	addrs := os.Args[0]
+	if len(os.Args) == 2 {
+		addrs = os.Args[1]
+	}
+	// 將實例群地址以逗點切分成字串陣列。
+	instances := strings.Split(addrs, ", ")
+	// 建立一個基於固定實例群的負載平衡器。
+	balancer := lb.NewBalancer(lb.FixedOption{
+		Mode:      lb.RoundRobin,
+		Instances: instances,
+	})
+	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure(), grpc.WithBalancer(balancer))
 	if err != nil {
 		log.Fatalf("連線失敗：%v", err)
 	}
+
 	return pb.NewTodoClient(conn)
 }
 

@@ -6,12 +6,12 @@
 
 ```bash
 # 啟動兩個資料庫服務實例，分別在 50050 和 50052 埠口上部署。
-go run ./database-svc/server/main.go 50050
-go run ./database-svc/server/main.go 50052
+go run ./database/main.go 50050
+go run ./database/main.go 50052
 # 接著是工作記事服務。
-go run ./todo-svc/server/main.go
+go run ./server/main.go
 # 然後開啟客戶端呼叫服務函式。
-go run ./todo-svc/client/main.go
+go run ./client/main.go
 ```
 
 ```bash

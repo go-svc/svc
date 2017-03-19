@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/go-svc/svc/examples/grpc-lb/todo-svc/pb"
+	"github.com/go-svc/svc/examples/grpc-lb/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )

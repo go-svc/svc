@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/go-svc/svc/examples/grpc-lb/database-svc/pb"
+	"github.com/go-svc/svc/examples/grpc-lb/pb"
 	"github.com/go-svc/svc/sd/consul"
 	"github.com/hashicorp/consul/api"
 	"github.com/jinzhu/gorm"
