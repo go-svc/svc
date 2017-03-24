@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 
 	"github.com/go-svc/svc/examples/grpc-ver-lb/pb"
 	"github.com/go-svc/svc/sd/consul"
@@ -73,8 +72,6 @@ func main() {
 	// 將此服務註冊到服務探索中心。
 	registerService()
 
-	// 在 gRPC 伺服器上註冊反射服務。
-	reflection.Register(s)
 	// 開始在指定埠口中服務。
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("無法提供服務：%v", err)

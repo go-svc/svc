@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 
 	"github.com/go-svc/svc/examples/grpc-fixed-lb/pb"
 	"github.com/go-svc/svc/sd/lb"
@@ -55,6 +54,7 @@ func newDB(tracer *opentracing.Tracer) pb.TodoClient {
 		Instances: instances,
 	})
 
+	// 透過負載平衡連線到資料庫，並且掛載追縱器。
 	conn, err := grpc.Dial("", grpc.WithInsecure(), grpc.WithBalancer(balancer), grpc.WithUnaryInterceptor(tracer.ClientInterceptor()))
 	if err != nil {
 		log.Fatalf("連線失敗：%v", err)
@@ -103,8 +103,6 @@ func main() {
 		db: newDB(dbTracer),
 	})
 
-	// 在 gRPC 伺服器上註冊反射服務。
-	reflection.Register(s)
 	// 開始在指定埠口中服務。
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("無法提供服務：%v", err)

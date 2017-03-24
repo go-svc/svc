@@ -10,7 +10,6 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
@@ -58,8 +57,6 @@ func main() {
 		db: newConnection(),
 	})
 
-	// 在 gRPC 伺服器上註冊反射服務。
-	reflection.Register(s)
 	// 開始在指定埠口中服務。
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("無法提供服務：%v", err)
