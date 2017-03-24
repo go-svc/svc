@@ -8,3 +8,5 @@
 * `nsq-pubsub`：透過 NSQ 分佈式訊息佇列系統在不同服務之間異步傳遞訊息。
 * `pb-pubsub`：以 NSQ 在不同服務之間異步傳遞 Protobuf 訊息並編碼、解碼。
 * `es-pubsub`：基於 EventStore 事件存儲中心廣播還有處理事件。
+* `grpc-opentracing`：基於負載平衡還有 OpenTracing 分布式追蹤系統的 gRPC 範例。
+* `grpc-metadata`：在 gRPC 內傳遞額外的中繼資料供追蹤、紀錄用途。
