@@ -75,6 +75,7 @@ func main() {
 	}
 
 	// 建立新 gRPC 伺服器並註冊 Todo 服務。
+	// 並且插入一個追蹤器以利於後續的動向追蹤。
 	s := grpc.NewServer(grpc.UnaryInterceptor(tracer.ServerInterceptor()))
 	pb.RegisterTodoServer(s, &server{
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
