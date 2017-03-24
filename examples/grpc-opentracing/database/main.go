@@ -20,8 +20,7 @@ var port string
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
 type server struct {
-	db     *gorm.DB
-	tracer *opentracing.Tracer
+	db *gorm.DB
 }
 
 // Add 會插入接收到的資料到本地資料庫。
@@ -61,6 +60,7 @@ func main() {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
 
+	// 建立一個給資料庫的追蹤器。
 	tracer, err := opentracing.NewTracer(opentracing.Tracer{
 		Collector: opentracing.Collector{
 			URL: "http://localhost:9411/api/v1/spans",
@@ -68,11 +68,11 @@ func main() {
 		Recorder: opentracing.Recorder{
 			Debug:       false,
 			Host:        "127.0.0.1:" + port,
-			ServiceName: "Database",
+			ServiceName: "資料庫",
 		},
 	})
 	if err != nil {
-		panic(err)
+		log.Fatalf("建立 OpenTracing 追蹤器時發生錯誤：%v", err)
 	}
 
 	// 建立新 gRPC 伺服器並註冊 Todo 服務。
@@ -80,8 +80,6 @@ func main() {
 	pb.RegisterTodoServer(s, &server{
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
 		db: newConnection(),
-		//
-		tracer: tracer,
 	})
 
 	// 在 gRPC 伺服器上註冊反射服務。

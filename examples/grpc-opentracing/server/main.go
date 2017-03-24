@@ -18,14 +18,15 @@ import (
 
 // server 建構體會實作 Todo 的 gRPC 伺服器。
 type server struct {
-	db     pb.TodoClient
-	tracer *opentracing.Tracer
+	db pb.TodoClient
 }
 
 // Add 會呼叫遠端 gRPC 資料庫並插入新的工作記事。
 func (s *server) Add(ctx context.Context, in *pb.Task) (*pb.Task, error) {
 	// 將接收到的資料透過 gRPC 客戶端傳送到遠端資料庫伺服器。
-	s.db.Add(context.Background(), in)
+	//
+	// 注意：這裡將接收到的 ctx 再次傳遞出去，所以追蹤器就能夠追蹤函式的動向。
+	s.db.Add(ctx, in)
 	return in, nil
 }
 
@@ -33,7 +34,9 @@ func (s *server) Add(ctx context.Context, in *pb.Task) (*pb.Task, error) {
 func (s *server) List(ctx context.Context, in *pb.Void) (*pb.Tasks, error) {
 	// 透過 gRPC 客戶端呼叫遠端資料庫伺服器的 List 函式，
 	// 用以取得工作記事列表。
-	tasks, _ := s.db.List(context.Background(), in)
+	//
+	// 注意：這裡將接收到的 ctx 再次傳遞出去，所以追蹤器就能夠追蹤函式的動向。
+	tasks, _ := s.db.List(ctx, in)
 	return tasks, nil
 }
 
@@ -52,7 +55,7 @@ func newDB(tracer *opentracing.Tracer) pb.TodoClient {
 		Instances: instances,
 	})
 
-	conn, err := grpc.Dial("localhost:50050", grpc.WithInsecure(), grpc.WithBalancer(balancer), grpc.WithUnaryInterceptor(tracer.ClientInterceptor()))
+	conn, err := grpc.Dial("", grpc.WithInsecure(), grpc.WithBalancer(balancer), grpc.WithUnaryInterceptor(tracer.ClientInterceptor()))
 	if err != nil {
 		log.Fatalf("連線失敗：%v", err)
 	}
@@ -60,7 +63,8 @@ func newDB(tracer *opentracing.Tracer) pb.TodoClient {
 	return pb.NewTodoClient(conn)
 }
 
-func newTracer() *opentracing.Tracer {
+// newTracer 會建立並回傳一個新的 Tracer，以用來定義此服務的追蹤器。
+func newTracer(serviceName string) *opentracing.Tracer {
 	tracer, err := opentracing.NewTracer(opentracing.Tracer{
 		Collector: opentracing.Collector{
 			URL: "http://localhost:9411/api/v1/spans",
@@ -68,7 +72,7 @@ func newTracer() *opentracing.Tracer {
 		Recorder: opentracing.Recorder{
 			Debug:       false,
 			Host:        "127.0.0.1:50051",
-			ServiceName: "ServerToDB",
+			ServiceName: serviceName,
 		},
 	})
 	if err != nil {
@@ -84,16 +88,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("無法監聽該埠口：%v", err)
 	}
-	//
-	tracer := newTracer()
 
-	// 建立新 gRPC 伺服器並註冊 Todo 服務。
+	// 建立一個此服務的追蹤器。
+	tracer := newTracer("中央伺服器")
+	// 建立另一個專門給資料庫客戶端的追蹤器。
+	dbTracer := newTracer("資料庫客戶端")
+
+	// 建立新 gRPC 伺服器並註冊 Todo 服務，並且帶入本服務的追蹤器，
+	// 如此一來才可以追蹤此服務的所有動向。
 	s := grpc.NewServer(grpc.UnaryInterceptor(tracer.ServerInterceptor()))
 	pb.RegisterTodoServer(s, &server{
 		// 建立連線到資料庫伺服器，所以稍後才能在本地伺服器中呼叫和資料庫相關的功能。
-		db: newDB(tracer),
-		//
-		tracer: tracer,
+		// 並且傳入一個專門給資料庫客戶端用的追蹤器，所以我們才能夠掌握和資料庫的連線動向。
+		db: newDB(dbTracer),
 	})
 
 	// 在 gRPC 伺服器上註冊反射服務。
