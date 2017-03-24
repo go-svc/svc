@@ -1,6 +1,6 @@
-# grpc-fixed-lb
+# grpc-opentracing
 
-這個範例是基於 `grpc-database` 衍生出來的。這是個最簡單、基本的負載平衡範例，傳入固定的實例地址，就可以直接進行負載平衡。如果希望地址不要是固定的，可以參考：`grpc-lb`。
+這個範例衍生於 `grpc-fixed-lb`，這是用來示範在分布式系統（與負載平衡）中如何追蹤函式的呼叫和花費時間，為了執行這個範例，你必須安裝 [OpenTracing](http://opentracing.io/)。
 
 ## 範例
 
@@ -18,6 +18,12 @@ go run ./client/main.go
 2017/03/12 06:35:38 Add 結果：測試, 這是測試的內容。
 2017/03/12 06:35:38 List 結果：{"tasks":[{"title":"測試","content":"這是測試的內容。"}]}
 ```
+
+## 螢幕截圖
+
+執行完畢後進入 `http://localhost:9411/traces/` 查看追蹤過程。
+
+![](./screenshot.png)
 
 ## Protobuf
 
