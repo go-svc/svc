@@ -14,12 +14,12 @@ import (
 )
 
 // server 建構體會實作 Calculator 的 gRPC 伺服器。
-type server struct {
-}
+type server struct{}
 
+// tokenContext 是 JSON Web Token 的內容。
 type tokenContext struct {
-	Iat      float64
-	Nbf      float64
+	Iat      int64
+	Nbf      int64
 	Username string
 }
 

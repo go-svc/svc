@@ -11,9 +11,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-type TokenContext struct {
-	Iat      float64
-	Nbf      float64
+// tokenContext 是 JSON Web Token 的內容。
+type tokenContext struct {
+	Iat      int64
+	Nbf      int64
 	Username string
 }
 
@@ -33,10 +34,10 @@ func main() {
 	// 建立新的簽署者，其密碼是 `JWT-Secret`，並採用 HS256 演算法。
 	signer := jwt.NewSigner("JWT-Secret", stdjwt.SigningMethodHS256)
 	// 以剛才建立的簽署者簽署下列資料。
-	token, err := signer.Sign(stdjwt.MapClaims{
-		"username": "YamiOdymel",
-		"nbf":      time.Now().Unix(),
-		"iat":      time.Now().Unix(),
+	token, err := signer.SignWithStruct(tokenContext{
+		Nbf:      time.Now().Unix(),
+		Iat:      time.Now().Unix(),
+		Username: "YamiOdymel",
 	})
 	if err != nil {
 		log.Fatalf("簽署 JSON Web Token 時發生錯誤：%v", err)
