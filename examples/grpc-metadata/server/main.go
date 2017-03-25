@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 
@@ -20,10 +19,10 @@ type server struct{}
 func (s *server) Plus(ctx context.Context, in *pb.CalcRequest) (*pb.CalcReply, error) {
 	// 從 Context 裡面解析接收到的中繼資料。
 	md, _ := metadata.FromContext(ctx)
-	fmt.Printf("已接收到中繼資料，資料來源是：%s\n", md["service_name"][0])
-	fmt.Printf("中繼資料 `test_meta` 的內容是：%s\n", md["test_meta"][0])
-	fmt.Printf("中繼資料 `test_meta2` 的內容是：%s\n", md["test_meta2"][0])
-	fmt.Printf("中繼資料 `test_meta3` 的內容是：%s\n", md["test_meta3"][0])
+	log.Printf("已接收到中繼資料，資料來源是：%s\n", md["service_name"][0])
+	log.Printf("中繼資料 `test_meta` 的內容是：%s\n", md["test_meta"][0])
+	log.Printf("中繼資料 `test_meta2` 的內容是：%s\n", md["test_meta2"][0])
+	log.Printf("中繼資料 `test_meta3` 的內容是：%s\n", md["test_meta3"][0])
 
 	// 計算傳入的數字。
 	result := in.NumberA + in.NumberB

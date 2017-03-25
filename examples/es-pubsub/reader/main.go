@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/go-svc/svc/pubsub/eventstore"
 	"github.com/jetbasrawi/go.geteventstore"
@@ -27,7 +27,7 @@ func main() {
 		// 呼叫 Scan 來將事件內容與中繼資料解析到變數中。
 		r.Scan(&data, &meta)
 		// 顯示解析後的資料。
-		fmt.Printf("事件已接收：%s, %s", data["nickname"], data["about_me"])
+		log.Printf("事件已接收：%s, %s", data["nickname"], data["about_me"])
 
 		// 對「已接收」頻道傳送 `true` 就能讓程式結束。
 		received <- true
