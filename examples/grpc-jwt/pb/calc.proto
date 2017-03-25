@@ -1,0 +1,21 @@
+// 撰寫格式是 Proto v3。
+syntax = "proto3";
+// 生成的程式在 Golang 中將會屬於 `pb` 套件。
+package pb;
+
+// Calculator 定義了一個計算用的服務。
+service Calculator {
+    // Plus 會接收 CalcRequest 資料作加總，最終會回傳 CalcReply。
+    rpc Plus (CalcRequest) returns (CalcReply) {}
+}
+
+// CalcRequest 包含了兩個數字，將會傳送至計算服務並對兩個數字進行計算。
+message CalcRequest {
+    int32 number_a = 1;
+    int32 number_b = 2;
+}
+
+// CalcReply 是計算結果，將會回傳給客戶端。
+message CalcReply {
+    int32 result = 1;
+}
