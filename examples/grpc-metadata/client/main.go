@@ -21,7 +21,7 @@ func main() {
 		ServiceName: "CalcClient",
 	})
 	// 在中繼資料中插入自訂資料，稍後會在伺服端進行解析。
-	ctx := md.Context(map[string]string{
+	ctx := md.ContextMap(map[string]string{
 		"test_meta":  "這是個測試用的中繼資料。",
 		"test_meta2": "你能夠透過中繼資料",
 		"test_meta3": "來在資料傳遞時夾帶一些額外的有用資訊。",
