@@ -1,0 +1,22 @@
+// 撰寫格式是 Proto v3。
+syntax = "proto3";
+// 生成的程式在 Golang 中將會屬於 `pb` 套件。
+package pb;
+
+// PingRequest 是 Ping 時需要傳入的基本資料。
+message PingRequest {
+  string value = 1;
+}
+
+// PingResponse 呈現了一個 Ping 會回傳的訊息。
+message PingResponse {
+  string value   = 1;
+  int32  counter = 2;
+}
+
+service TestService {
+  // Ping 會接收 PingRequest 並將接收到的訊息轉換成 PingResponse 然後回傳。
+  rpc Ping(PingRequest) returns (PingResponse) {}
+  // PingStream 是一個串流，類似 WebSocket，會向客戶端每隔 200 毫秒就傳送 1 則 PingResponse，總共會回傳 10 次。
+  rpc PingStream(PingRequest) returns (stream PingResponse) {}
+}
